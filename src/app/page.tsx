@@ -2,8 +2,7 @@
 import DialogBox from "@/components/common/dialog-box";
 import TaskCard from "@/components/common/task-card";
 import { Button } from "@/components/ui/button";
-import { tasks } from "@/lib/constants";
-import { CalendarIcon, CirclePlus, Info, LoaderCircle } from "lucide-react";
+import { CalendarIcon, CirclePlus, LoaderCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,12 +34,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Task } from "@/lib/types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import StatusHelper from "@/components/common/status-helper";
 const Home = () => {
   const [openAddTaskDialog, setOpenAddTaskDialog] = useState<boolean>(false);
@@ -64,8 +57,18 @@ const Home = () => {
     setOpenAddTaskDialog(true);
   };
 
-  const onSubmit = () => {
-    console.log("form is submitted");
+  const onSubmit = async (formData: any) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/tasks",
+        formData
+      );
+      if (response.status === 201) {
+        setOpenAddTaskDialog(false);
+      }
+    } catch (error) {
+      console.log("Error creating the task: ", error);
+    }
   };
 
   const handleEditTask = (id: string) => {
@@ -170,7 +173,6 @@ const Home = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -181,7 +183,7 @@ const Home = () => {
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <FormControl>
-                    <Select>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Pending" />
                       </SelectTrigger>
@@ -192,7 +194,6 @@ const Home = () => {
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -212,12 +213,7 @@ const Home = () => {
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? (
-                            // format(field.value, "PPP")
-                            field.value
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
+                          {field.value ? field.value : <span>Pick a date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -225,8 +221,10 @@ const Home = () => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => field.onChange(date?.toISOString())}
                         disabled={(date) =>
                           date < new Date() || date < new Date("1900-01-01")
                         }
@@ -234,7 +232,6 @@ const Home = () => {
                       />
                     </PopoverContent>
                   </Popover>
-                  <FormMessage />
                 </FormItem>
               )}
             />
