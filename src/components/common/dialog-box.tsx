@@ -15,7 +15,6 @@ type Props = {
   title: string;
 
   description: string;
-  primaryButtonFunction?: () => void;
   primaryButtonLabel?: string;
   children: React.ReactNode;
   className: string;
@@ -26,7 +25,6 @@ const DialogBox: React.FC<Props> = ({
   onClose,
   title,
   description,
-  primaryButtonFunction,
   primaryButtonLabel,
   children,
   className,

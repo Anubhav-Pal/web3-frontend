@@ -315,8 +315,12 @@ const Home = () => {
       <DialogBox
         open={openAddTaskDialog}
         onClose={handleDialogClose}
-        title="Add a new task"
-        description="Please provide a title and description for the new task. Once added, you can track the task's progress and set its status."
+        title={isEditing ? "Edit this task" : "Add a new task"}
+        description={
+          isEditing
+            ? "Make changes to this task and hit update once done."
+            : "Please provide a title and description for the new task. Once added, you can track the task's progress and set its status."
+        }
         className=""
       >
         <Form {...form}>
