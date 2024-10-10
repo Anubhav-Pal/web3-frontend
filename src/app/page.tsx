@@ -37,8 +37,11 @@ import { Task } from "@/lib/types";
 import StatusHelper from "@/components/common/status-helper";
 import { useToast } from "@/hooks/use-toast";
 import { ModeToggle } from "@/components/common/dark-mode-toggle";
+import { createEditTaskSchema } from "@/lib/form-schema";
 const Home = () => {
   const { toast } = useToast();
+
+  // States
   const [openAddTaskDialog, setOpenAddTaskDialog] = useState<boolean>(false);
   const [editTaskData, setEditTaskData] = useState<Task | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false as boolean);
@@ -46,15 +49,11 @@ const Home = () => {
   const [selectPriority, setSelectPriority] = useState<string>("all" as string);
   const [loading, setLoading] = useState<boolean>(true as boolean);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const formSchema = z.object({
-    title: z.string().min(2, {
-      message: "title is required and must be at least 2 characters.",
-    }),
-    description: z.string().optional(),
-    status: z.string(),
-    dueDate: z.date().optional(),
-    priority: z.string().optional(),
-  });
+
+  // Form Schema
+  const formSchema = createEditTaskSchema;
+
+  // Form initiliasation
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -65,11 +64,16 @@ const Home = () => {
       dueDate: undefined,
     },
   });
+
   const handleAddTask = () => {
     setEditTaskData(null);
     setOpenAddTaskDialog(true);
   };
-
+  const handleDialogClose = () => {
+    setOpenAddTaskDialog(false);
+    setIsEditing(false);
+  };
+  // Form submit function
   const onSubmit = async (formData: {
     title: string;
     description?: string;
@@ -97,6 +101,7 @@ const Home = () => {
     }
   };
 
+  // Form edit function
   const onEdit = async (editedFormData: {
     title: string;
     description?: string;
@@ -127,6 +132,7 @@ const Home = () => {
     }
   };
 
+  // Form edit handler
   const handleEditTask = (taskData: Task) => {
     console.log({ taskData });
     setIsEditing(true);
@@ -134,6 +140,7 @@ const Home = () => {
     setOpenAddTaskDialog(true);
   };
 
+  // Delete task function
   const handleDeleteTask = async (id: string) => {
     try {
       console.log({ id });
@@ -151,6 +158,7 @@ const Home = () => {
     }
   };
 
+  // Fetch all tasks
   const fetchAllTasks = async () => {
     setLoading(true);
     try {
@@ -165,9 +173,11 @@ const Home = () => {
     setLoading(false);
   };
 
+  // usestates
   useEffect(() => {
     fetchAllTasks();
   }, []);
+
   useEffect(() => {
     if (editTaskData) {
       form.reset({
@@ -188,10 +198,6 @@ const Home = () => {
     }
   }, [editTaskData, form]);
 
-  const handleDialogClose = () => {
-    setOpenAddTaskDialog(false);
-    setIsEditing(false);
-  };
   useEffect(() => {
     const fetchFilteredTasks = async () => {
       setLoading(true);
