@@ -13,15 +13,19 @@ import {
 } from "@/components/ui/popover";
 import { Edit, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
+import { Task } from "@/lib/types";
+import { Badge } from "../ui/badge";
 
 type Props = {
+  _id: string;
   key: number;
   title: string;
   description?: string;
-  status: string;
+  status: "completed" | "in-progress" | "pending";
+  priority: "low" | "medium" | "high";
   dueDate?: Date;
   onDelete: (id: string) => void;
-  onEdit: (id: string) => void;
+  onEdit: (taskData: Task) => void;
 };
 
 const getStatusColor = (status: string) => {
@@ -36,6 +40,18 @@ const getStatusColor = (status: string) => {
       return "bg-gray-500";
   }
 };
+const getBadgeColor = (priority: "low" | "medium" | "high") => {
+  switch (priority) {
+    case "low":
+      return "bg-green-400";
+    case "medium":
+      return "bg-yellow-400";
+    case "high":
+      return "bg-red-400";
+    default:
+      return "gray";
+  }
+};
 const TaskCard: React.FC<Props> = ({
   title,
   description,
@@ -44,11 +60,12 @@ const TaskCard: React.FC<Props> = ({
   _id,
   onEdit,
   onDelete,
+  priority,
 }) => {
   return (
     <div>
-      <Card className="w-[480px] md:w-[400px] min-h-[250px] rounded-sm border-[0.5px] shadow-none flex flex-col justify-between">
-        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 ">
+      <Card className="w-full md:w-[400px] min-h-[250px] rounded-sm border-[0.5px] shadow-none flex flex-col justify-between">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 w-full">
           <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           {/* <Popover open={isOpen} onOpenChange={setIsOpen}> */}
           <Popover>
@@ -64,8 +81,15 @@ const TaskCard: React.FC<Props> = ({
                   size="sm"
                   className="justify-start "
                   onClick={() => {
-                    onEdit("10");
-                    // setIsOpen(false);
+                    const taskData = {
+                      title,
+                      description,
+                      status,
+                      dueDate,
+                      priority,
+                      _id,
+                    };
+                    onEdit(taskData);
                   }}
                 >
                   <Edit className="mr-2 h-4 w-4" />
@@ -76,7 +100,7 @@ const TaskCard: React.FC<Props> = ({
                   size="sm"
                   className="justify-start"
                   onClick={() => {
-                    onDelete("10");
+                    onDelete(_id);
                     // setIsOpen(false);
                   }}
                 >
@@ -87,13 +111,22 @@ const TaskCard: React.FC<Props> = ({
             </PopoverContent>
           </Popover>
         </CardHeader>
-        <CardContent>
+        <CardContent className="w-full">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {description}
           </p>
         </CardContent>
         <CardFooter className="flex justify-between flex-col p-0">
           <div className="flex justify-between w-full px-6 pb-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <Badge
+                className={`font-semibold shadow-none ${getBadgeColor(
+                  priority
+                )}`}
+              >
+                Priority: {priority}
+              </Badge>
+            </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
               Due:{" "}
               {dueDate ? new Date(dueDate).toLocaleDateString() : "No due date"}
@@ -103,7 +136,7 @@ const TaskCard: React.FC<Props> = ({
             className={`${getStatusColor(
               status
             )} text-white shadow-none rounded-b-sm w-full h-1`}
-          ></div>
+          />
         </CardFooter>
       </Card>
     </div>
