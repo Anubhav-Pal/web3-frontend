@@ -31,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, serverUrl } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Task } from "@/lib/types";
 import StatusHelper from "@/components/common/status-helper";
@@ -83,10 +83,7 @@ const Home = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/tasks",
-        dataToSubmit
-      );
+      const response = await axios.post(`${serverUrl}/tasks`, dataToSubmit);
       if (response.status === 201) {
         setOpenAddTaskDialog(false);
         form.reset();
@@ -114,7 +111,7 @@ const Home = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/tasks/${editTaskData?._id}`,
+        `${serverUrl}/tasks/${editTaskData?._id}`,
         dataToEdit
       );
       if (response.status === 200) {
@@ -140,7 +137,7 @@ const Home = () => {
   const handleDeleteTask = async (id: string) => {
     try {
       console.log({ id });
-      const response = await axios.delete(`http://localhost:8000/tasks/${id}`);
+      const response = await axios.delete(`${serverUrl}/tasks/${id}`);
       console.log(response);
       if (response.status === 200 || response.status === 204) {
         fetchAllTasks();
@@ -157,7 +154,7 @@ const Home = () => {
   const fetchAllTasks = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8000/tasks");
+      const response = await axios.get(`${serverUrl}/tasks`);
       if (response.status === 200) {
         setTasks(response.data);
         console.log(response.data);
@@ -199,7 +196,7 @@ const Home = () => {
     const fetchFilteredTasks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:8000/tasks");
+        const response = await axios.get(`${serverUrl}/tasks`);
         if (response.status === 200) {
           let fetchedTasks = response.data;
 
@@ -228,7 +225,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden">
-      <div className="w-full px-12 py-4 shadow-sm flex items-center justify-between w-full">
+      <div className="w-full px-12 py-4 shadow-sm flex items-center justify-between">
         <div className="text-2xl font-bold">Taskify</div>
         <div>
           <ModeToggle />
